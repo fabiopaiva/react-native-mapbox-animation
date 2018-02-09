@@ -10,6 +10,20 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
+"@mapbox/react-native-mapbox-gl@^6.0.3-rc1":
+  version "6.0.3-rc1"
+  resolved "https://registry.yarnpkg.com/@mapbox/react-native-mapbox-gl/-/react-native-mapbox-gl-6.0.3-rc1.tgz#3e15054785f40953a986812b6507d644570e98ad"
+  dependencies:
+    "@turf/helpers" "4.6.0"
+
+"@turf/helpers@4.6.0":
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/@turf/helpers/-/helpers-4.6.0.tgz#12398733b8ae28420df6166fa44c7ee8ffd6414c"
+
+"@turf/helpers@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/@turf/helpers/-/helpers-6.0.1.tgz#625112616159e519033dc5d24c094ccbce7a457f"
+
 abab@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/abab/-/abab-1.0.4.tgz#5faad9c2c07f60dd76770f71cf025b62a63cfd4e"

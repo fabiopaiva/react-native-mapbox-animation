@@ -9,10 +9,12 @@ import {
   StyleSheet,
   View,
   Text,
+  Image,
 } from 'react-native';
 import MapboxGL from '@mapbox/react-native-mapbox-gl';
 import { lineString as makeLineString } from '@turf/helpers';
 import { MAPBOX_ACCESS_TOKEN } from './MapboxAccessToken';
+import carIcon from './icons/ic_directions_car.png';
 
 MapboxGL.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
@@ -33,6 +35,10 @@ const layerStyles = MapboxGL.StyleSheet.create({
     lineJoin: MapboxGL.LineJoin.Round,
     lineCap: MapboxGL.LineCap.Round,
   },
+  icon: {
+    iconImage: carIcon,
+    iconSize: 1,
+  },
 });
 
 const origin = 'Av. do Contorno, 6061 - São Pedro, Belo Horizonte - MG, 30110-929, Brazil';
@@ -44,9 +50,13 @@ export default class App extends Component {
     centerCoordinate: null,
     error: null,
     route: null,
+    iconPosition: null,
+    coordinates: [],
+    atPosition: 0,
   }
 
   _mapRef;
+  _timerId = 0;
 
   componentWillMount() {
    this.getDirections();
@@ -68,8 +78,14 @@ export default class App extends Component {
               acc.push([step.end_location.lng, step.end_location.lat]);
               return acc;
             }, []);
-
-            this.setState({ centerCoordinate, route: makeLineString(coordinates) });
+            this.setState({
+              centerCoordinate,
+              coordinates,
+              route: makeLineString(coordinates),
+              iconPosition: MapboxGL.geoUtils.makeFeatureCollection([
+                MapboxGL.geoUtils.makePoint(coordinates[0])
+              ]),
+            });
 
             if (this._mapRef) {
               this._mapRef.fitBounds(
@@ -77,6 +93,7 @@ export default class App extends Component {
                 [leg.end_location.lng, leg.end_location.lat]
               );
             }
+            this.startAnimation();
           }
         }
       }
@@ -86,8 +103,31 @@ export default class App extends Component {
     }
   }
 
+  startAnimation() {
+    this._timerId = setInterval(() => {
+      const { coordinates, atPosition } = this.state;
+      if (atPosition < coordinates.length - 1) {
+        this.setState({
+          atPosition: atPosition + 1,
+          iconPosition: MapboxGL.geoUtils.makeFeatureCollection([
+            MapboxGL.geoUtils.makePoint(coordinates[atPosition + 1])
+          ]),
+        });
+        if (this._mapRef) {
+          this._mapRef.flyTo(coordinates[atPosition + 1], 12000);
+        }
+      } else {
+        clearInterval(this._timerId);
+      }
+    }, 800);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this._timerId);
+  }
+
   render() {
-    const { centerCoordinate, error, route } = this.state;
+    const { centerCoordinate, error, route, iconPosition } = this.state;
     if (error) return <Text>{error}</Text>
 
     return (
@@ -96,11 +136,20 @@ export default class App extends Component {
           ref={(ref) => { this._mapRef = ref }}
           style={styles.map}
           centerCoordinate={centerCoordinate}
+          zoomLevel={14}
         >
         {route && (
           <MapboxGL.ShapeSource id='routeSource' shape={route}>
             <MapboxGL.LineLayer id='routeFill' style={layerStyles.route} />
           </MapboxGL.ShapeSource>
+        )}
+        {iconPosition && (
+          <MapboxGL.Animated.ShapeSource id='symbolCarIcon' shape={iconPosition}>
+            <MapboxGL.Animated.SymbolLayer
+              id='symbolCarLayer'
+              minZoomLevel={1}
+              style={layerStyles.icon} />
+          </MapboxGL.Animated.ShapeSource>
         )}
         </MapboxGL.MapView>
       </View>

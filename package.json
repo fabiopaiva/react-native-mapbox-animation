@@ -8,7 +8,9 @@
   },
   "dependencies": {
     "@mapbox/react-native-mapbox-gl": "^6.0.3-rc1",
+    "@turf/distance": "^6.0.0",
     "@turf/helpers": "^6.0.1",
+    "@turf/line-chunk": "^5.1.5",
     "react": "16.2.0",
     "react-native": "0.53.0"
   },
